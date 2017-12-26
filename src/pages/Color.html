@@ -1,0 +1,122 @@
+<!-- HTML -->
+<form onsubmit="#">
+  <div id="colorPicker"></div>
+  <br>
+  <InputSlider label=duration bind:value=value.duration
+                limitMax=60 limitStep=0.1 
+                colorMin='#aaa' colorMax='#aaa'
+                valueSuffix=s
+                /> 
+  <br>
+</form>
+
+<DebugArea bind:value=value />
+
+
+<!-- CSS -->
+<style>
+  #colorPicker {
+    border-bottom: 2px solid #cacaca;
+    padding-bottom: 14px;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+import InputSlider from '../components/InputSlider.html';
+import DebugArea from '../components/DebugArea.html';
+import { restGET, restPOST, displayError } from '../util.js'
+
+var colorPicker = null;
+var lastPost = (new Date()).getTime();
+export default {
+  data () {
+    return {
+      value: {
+        R: 0,
+        G: 0,
+        B: 0,
+        duration: 0
+      }
+    }
+  },
+
+  components: { 
+    InputSlider,
+    DebugArea
+  },
+
+  oncreate () {
+    var self = this;
+    // Workaround for failing to set values on load
+    self.set( { value: self.get('value') } );
+
+
+    colorPicker = new iro.ColorPicker('#colorPicker', {
+      width: 370
+    });
+
+    colorPicker.on("color:change", function(color, changes) {
+      var currTime = (new Date()).getTime();
+
+      // Get value and create shallow copy
+      var value = Object.assign({}, self.get( 'value' ));
+
+      value.R = color.rgb.r || 0;
+      value.G = color.rgb.g || 0;
+      value.B = color.rgb.b || 0;
+      self.set({ value: value });
+
+      // Limit to 250ms between each post
+      if (currTime > lastPost && currTime - lastPost < 250)
+        return;
+      lastPost = currTime;
+
+      // Create shallow copy      
+      value = Object.assign({}, value);
+
+      // Convert duration to ms
+      value.duration = Math.floor(value.duration * 10) * 100;
+
+      restPOST('./status', value, function(error) {
+        displayError(error, true);
+        if (error)
+          return;
+      });
+    });
+
+    // Simple documnet ready function
+    function onDocReady(func){
+      /in/.test(document.readyState)?setTimeout(onDocReady,9,func):func()
+    }
+    
+    // colorPicker.color is undefined on load, need to wait for document ready
+    restGET('./status', function(error, data) {
+      displayError(error, true);
+      if (error)
+        return;
+      onDocReady(function(){
+
+        // Get value and create shallow copy
+        var value = Object.assign({}, self.get( 'value' ));
+
+        value.R = data.R || 0;
+        value.G = data.G || 0;
+        value.B = data.B || 0;
+        self.set({ value: value });
+
+        if (colorPicker)
+          colorPicker.color.set({r: data.R || 0, g: data.G || 0, b: data.B || 0 });
+      });
+    });
+  },
+
+  ondestroy () {
+    colorPicker = null;
+  },
+
+  methods: {
+  }
+}
+</script>

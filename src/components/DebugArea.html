@@ -1,0 +1,41 @@
+<!-- HTML -->
+{{#if debug === true}}
+<div id="debugArea">
+  <label>Debug:</label><pre>{{JSON.stringify(value, null, 2)}}</pre>
+</div>
+{{/if}}
+
+
+<!-- CSS -->
+<style>
+  #debugArea {
+    margin: 10px 0;
+    white-space: pre;
+    font-family: Courier;
+    background-color: #faa;
+  }
+
+  #debugArea label {
+    display: block;
+    font-weight: bold;
+    font-size: 16px;
+    background-color: #f88;
+  }
+  #debugArea pre {
+    margin: 5px;
+    padding: 5px;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+export default {
+  data () {
+    return {
+      value: {},
+      debug: false
+    }
+  },
+};
+</script>

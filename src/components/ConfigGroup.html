@@ -1,0 +1,61 @@
+<!-- HTML -->
+{{#if label.length}}
+<div class="valueGroup">
+<label>{{label}}</label>
+</div>
+{{/if}}
+{{#each Object.keys(value) as prop}}
+  {{#if typeof value[prop] === 'string'}}
+    {{#if prop.substr(-5) === 'passw'}}
+      <InputPassword label={{prop}} bind:value=value[prop]/>
+    {{else}}
+      <InputText label={{prop}} bind:value=value[prop]/>
+    {{/if}}
+  {{elseif typeof value[prop] === 'boolean'}}
+    <InputBool label={{prop}} bind:value=value[prop]/>
+  {{elseif typeof value[prop] === 'object'}}
+    <ConfigGroup label={{prop}} bind:value=value[prop]/>
+  {{/if}}
+{{/each}}
+
+
+<!-- CSS -->
+<style>
+  .valueGroup {
+    margin: 10px 0 4px 10px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .valueGroup label {
+    margin: 0 10px 0 0;
+    border-bottom: 2px solid #aaa;
+    display:block;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+import InputBool      from './InputBool.html';
+import InputText      from './InputText.html';
+import InputPassword  from './InputPassword.html';
+
+export default {
+  data () {
+    return {
+      label: '',
+      value: {}
+    }
+  },
+  components: { 
+    ConfigGroup,
+    InputBool,
+    InputNumber,
+    InputText,
+    InputPassword,
+  },
+};
+</script>
+
+

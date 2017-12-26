@@ -1,0 +1,101 @@
+<!-- HTML -->
+<form on:submit='handleSubmit( event )'>
+  <div class="">
+    <ConfigGroup bind:value=config />
+  </div>
+  <div class="buttons">
+    <input type="button" on:click="handleRefresh( event )" class="btnRefresh" value="Get Current">
+    <input type="button" on:click="handleSubmit( event )"  class="btnPost" value="Set Values">
+  </div>
+</form>
+
+<DebugArea bind:value=config />
+
+
+<!-- CSS -->
+<style>
+  div.buttons {
+    margin-top: 10px;
+    display: flex;
+    background-color: #ccc;
+    padding: 10px 15px;
+  }
+
+  div.buttons input[type=button]:hover {
+    background-color: #3b6989;
+  }
+
+  div.buttons input[type=button] {
+    background-color: #5b8dad;
+    border: 0;
+    color: #ffffff;
+    flex-grow: 1;
+    margin: 2px 10px;
+    padding: 8px 10px;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+import ConfigGroup from '../components/ConfigGroup.html';
+import DebugArea from '../components/DebugArea.html';
+import { restGET, restPOST, displayError } from '../util.js';
+
+export default {
+  data () {
+    return {
+      config: {}
+    }
+  },
+
+  components: {
+    ConfigGroup,
+    DebugArea
+  },
+
+  oncreate () {
+    var self = this;
+    // Workaround for failing to set values on load
+    self.set( { config: self.get('config') } );
+
+    restGET('./config', function(error, data) {
+      displayError(error, true);
+      if (error)
+        return;
+      self.set( { config: data } );
+    });
+  },
+
+  methods: {
+    handleRefresh: function ( event ) {
+      // prevent the page from reloading
+      event.preventDefault();
+
+      var self = this;
+      restGET('./config', function(error, data) {
+        displayError(error, false);
+        if (error)
+          return;
+        self.set( { config: data } );
+      });
+    },
+    handleSubmit: function ( event ) {
+      // prevent the page from reloading
+      event.preventDefault();
+
+      var self = this;
+      var value = this.get('config');
+
+      restPOST('./config', value, function(error, data) {
+        displayError(error, false);
+        if (error)
+          return;
+        if (typeof data === 'object')
+          self.set( { config: data } );
+      });
+
+    }
+  }
+};
+</script>

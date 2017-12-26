@@ -1,0 +1,1 @@
+{ "mqtt_server": "server", "mqtt_port": "1883", "mqtt_alias": "alias", "mqtt_login": "login", "mqtt_passw": "passw", "button_fade": { "R": false, "G": true, "B": true, "W1": false, "W2": true } }

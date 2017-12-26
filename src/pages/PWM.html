@@ -1,0 +1,142 @@
+<!-- HTML -->
+<form on:submit='handleSubmit( event )'>
+  <div>
+    <InputSlider label=R limitMax=255 colorMax=#f00 bind:value=value.R/>
+    <InputSlider label=G limitMax=255 colorMax=#0f0 bind:value=value.G/>
+    <InputSlider label=B limitMax=255 colorMax=#00f bind:value=value.B/>
+    <InputSlider label=W1 limitMax=255 bind:value=value.W1/>
+    <InputSlider label=W2 limitMax=255 bind:value=value.W2/>
+    <InputSlider label=duration bind:value=value.duration
+                  limitMax=60 limitStep=0.1 
+                  colorMin='#aaa' colorMax='#aaa'
+                  valueSuffix=s
+                  /> 
+  </div>
+  <div class="buttons">
+    <input type="button" on:click="handleRefresh( event )" class="btnRefresh" value="Get Current">
+    <input type="button" on:click="handleSubmit( event )"  class="btnPost" value="Set Values">
+  </div>
+</form>
+
+<DebugArea bind:value=value />
+
+
+<!-- CSS -->
+<style>
+  div.buttons {
+    margin-top: 10px;
+    display: flex;
+    background-color: #ccc;
+    padding: 10px 15px;
+  }
+
+  div.buttons input[type=button]:hover {
+    background-color: #3b6989;
+  }
+
+  div.buttons input[type=button] {
+    background-color: #5b8dad;
+    border: 0;
+    color: #ffffff;
+    flex-grow: 1;
+    margin: 2px 10px;
+    padding: 8px 10px;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+import InputSlider from '../components/InputSlider.html';
+import DebugArea from '../components/DebugArea.html';
+
+import { restGET, restPOST, displayError } from '../util.js';
+
+function formatterDuration (value) {
+  if (typeof value === 'string')
+    value = parseInt(value, 10);
+  value = value || 0;
+  return (value / 1000) + 's'
+}
+
+export default {
+  data () {
+    return {
+      value: {
+        R: 0,
+        G: 0,
+        B: 0,
+        W1: 0,
+        W2: 0,
+        duration: 0
+      }
+    }
+  },
+
+  components: { 
+    InputSlider,
+    DebugArea
+  },
+
+  oncreate () {
+    var self = this;    
+    // Workaround for failing to set values on load
+    self.set( { value: self.get('value') } );
+
+    restGET('./status', function(error, data) {
+      if (error) {
+        displayError(error, true);
+        return;
+      }
+      var oldData = self.get('value');
+      var newData = processData(oldData, data)
+      self.set( { value: newData } );
+    });
+  },
+
+
+  helpers: {
+    processData:function(oldData, newData) {
+      var retData = Object.assign({}, oldData);
+      if (typeof newData.R === 'number') retData.R = newData.R;
+      if (typeof newData.G === 'number') retData.G = newData.G;
+      if (typeof newData.B === 'number') retData.B = newData.B;
+      if (typeof newData.W1 === 'number') retData.W1 = newData.W1;
+      if (typeof newData.W2 === 'number') retData.W2 = newData.W2;
+      return retData;
+    },
+  },
+
+  methods: {
+    handleRefresh: function ( event ) {
+      // prevent the page from reloading
+      event.preventDefault();
+
+      var self = this;
+      restGET('./status', function(error, data) {
+        displayError(error, false);
+        if (error)
+          return;
+        var oldData = self.get('value');
+        var newData = processData(oldData, data)
+        self.set( { value: newData } );
+      });
+    },
+
+    handleSubmit: function ( event ) {
+      // prevent the page from reloading
+      event.preventDefault();
+
+      // Get value and create shallow copy
+      var value = Object.assign({}, this.get( 'value' ));
+      
+      // Convert duration to ms
+      value.duration = Math.floor(value.duration * 10) * 100;
+
+      restPOST('./status', value, function(error) {
+        displayError(error, false);
+      });
+    }
+  }
+};
+</script>
