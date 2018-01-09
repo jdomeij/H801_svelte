@@ -1,0 +1,1 @@
+{"name":"H801 Kitchen","wifi":{"ip":"192.168.1.108","subnet":"255.255.255.0","gateway":"192.168.1.2","mac":"5C:CF:7F:02:1A:0D","ssid":"ApaNet"},"system":{"chip_id":137741,"sdk_version":"2.1.0(deb1901)","chip_size":1048576,"chip_real_size":1048576},"spiffs":{"used":28865,"free":24096}}

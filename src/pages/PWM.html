@@ -1,14 +1,19 @@
 <!-- HTML -->
 <form on:submit='handleSubmit( event )'>
   <div>
-    <InputSlider label=R limitMax=255 colorMax=#f00 bind:value=value.R/>
-    <InputSlider label=G limitMax=255 colorMax=#0f0 bind:value=value.G/>
-    <InputSlider label=B limitMax=255 colorMax=#00f bind:value=value.B/>
-    <InputSlider label=W1 limitMax=255 bind:value=value.W1/>
-    <InputSlider label=W2 limitMax=255 bind:value=value.W2/>
-    <InputSlider label=duration bind:value=value.duration
-                  limitMax=60 limitStep=0.1 
-                  colorMin='#aaa' colorMax='#aaa'
+    {{#each Object.keys(value) as key}}
+      <InputSlider  label={{key}}
+                    bind:value=value[key]
+                    limitMax=255
+                    colorMax={{colors.hasOwnProperty(key)?colors[key]:'#fff'}}
+                    />
+    {{/each}}
+    <InputSlider  label=duration
+                  bind:value=duration
+                  limitMax=60
+                  limitStep=0.1 
+                  colorMin='#aaa'
+                  colorMax='#aaa'
                   valueSuffix=s
                   /> 
   </div>
@@ -52,24 +57,17 @@ import DebugArea from '../components/DebugArea.html';
 
 import { restGET, restPOST, displayError } from '../util.js';
 
-function formatterDuration (value) {
-  if (typeof value === 'string')
-    value = parseInt(value, 10);
-  value = value || 0;
-  return (value / 1000) + 's'
-}
-
 export default {
   data () {
     return {
       value: {
-        R: 0,
-        G: 0,
-        B: 0,
-        W1: 0,
-        W2: 0,
-        duration: 0
-      }
+      },
+      colors: {
+        'R': '#f00',
+        'G': '#0f0',
+        'B': '#00f'
+      },
+      duration: 1.0
     }
   },
 
@@ -88,23 +86,8 @@ export default {
         displayError(error, true);
         return;
       }
-      var oldData = self.get('value');
-      var newData = processData(oldData, data)
-      self.set( { value: newData } );
+      self.set( { value: data } );
     });
-  },
-
-
-  helpers: {
-    processData:function(oldData, newData) {
-      var retData = Object.assign({}, oldData);
-      if (typeof newData.R === 'number') retData.R = newData.R;
-      if (typeof newData.G === 'number') retData.G = newData.G;
-      if (typeof newData.B === 'number') retData.B = newData.B;
-      if (typeof newData.W1 === 'number') retData.W1 = newData.W1;
-      if (typeof newData.W2 === 'number') retData.W2 = newData.W2;
-      return retData;
-    },
   },
 
   methods: {
@@ -117,9 +100,7 @@ export default {
         displayError(error, false);
         if (error)
           return;
-        var oldData = self.get('value');
-        var newData = processData(oldData, data)
-        self.set( { value: newData } );
+        self.set( { value: data } );
       });
     },
 
@@ -129,9 +110,9 @@ export default {
 
       // Get value and create shallow copy
       var value = Object.assign({}, this.get( 'value' ));
-      
+  
       // Convert duration to ms
-      value.duration = Math.floor(value.duration * 10) * 100;
+      value.duration = Math.floor(this.get('duration') * 10) * 100;
 
       restPOST('./status', value, function(error) {
         displayError(error, false);

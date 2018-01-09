@@ -3,7 +3,7 @@
   <div id="colorPicker"></div>
   <br>
   <InputSlider label=duration bind:value=value.duration
-                limitMax=60 limitStep=0.1 
+                limitMax=20 limitStep=0.1 
                 colorMin='#aaa' colorMax='#aaa'
                 valueSuffix=s
                 /> 
@@ -37,7 +37,7 @@ export default {
         R: 0,
         G: 0,
         B: 0,
-        duration: 0
+        duration: 1.0
       }
     }
   },
@@ -50,8 +50,7 @@ export default {
   oncreate () {
     var self = this;
     // Workaround for failing to set values on load
-    self.set( { value: self.get('value') } );
-
+    self.set({});
 
     colorPicker = new iro.ColorPicker('#colorPicker', {
       width: 370
@@ -80,7 +79,7 @@ export default {
       value.duration = Math.floor(value.duration * 10) * 100;
 
       restPOST('./status', value, function(error) {
-        displayError(error, true);
+        displayError(error, false);
         if (error)
           return;
       });

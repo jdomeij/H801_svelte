@@ -1,0 +1,65 @@
+<!-- HTML -->
+{{#each Object.keys(value) as key}}
+  {{#if typeof value[key] === 'object'}}
+    <span class="cat">{{key}}</span>
+    <div class="cat">
+      <:Self value='{{value[key]}}'/>
+    </div>
+  {{else}}
+    <div class="val">
+      <span class="key">{{key}}:</span>
+      <span class="val">{{value[key]}}</span>
+    </div>
+  {{/if}}
+{{/each}}
+
+
+<!-- CSS -->
+<style>
+  span.cat {
+    display: block;
+    padding-bottom: 5px;
+    margin: 15px 15px 5px 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 2px solid black;
+  }
+  div.cat {
+    margin: 5px 0px 15px 15px;
+  }
+
+  div.val {
+    margin: 5px 0 5px 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  div.val > span {
+    display: inline-block;
+    line-height: 16px;
+    font-size: 16px;
+  }
+
+  span.key {
+    min-width: 100px;
+  }
+
+  span.val {
+    display: inline-block;
+    min-width: 160px;
+    text-align: left;
+    margin-right: 15px;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+export default {
+  data () {
+    return {
+      value: {},
+    }
+  },
+};
+</script>

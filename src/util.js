@@ -1,4 +1,7 @@
-function displayError(text, appendText) {
+function displayError(error, appendText) {
+  if (error)
+    console.log(error);
+
   var errorArea = document.querySelector( '#errorArea' );
 
   if (!errorArea)
@@ -6,15 +9,15 @@ function displayError(text, appendText) {
 
   // Do we want to stack the errors
   if (appendText === true && errorArea.innerHTML.length !== 0) {
-    if (text !== null) {
-      errorArea.innerHTML += '<br>' + text.toString();
+    if (error !== null) {
+      errorArea.innerHTML += '<br>' + error.toString();
       errorArea.style.display = 'block';
     }
   }
 
   // Clear errors between each calls
-  else if (text !== null) {
-    errorArea.innerHTML = text.toString()
+  else if (error !== null) {
+    errorArea.innerHTML = error.toString()
     errorArea.style.display = 'block';
   }
 

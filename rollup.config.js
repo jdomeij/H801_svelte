@@ -4,8 +4,11 @@ import uglify from 'rollup-plugin-uglify';
 import gzip from 'rollup-plugin-gzip';
 import { minify } from 'uglify-es';
 import copy from 'rollup-plugin-copy';
+import resolve from 'rollup-plugin-node-resolve';
 
 const production = !process.env.ROLLUP_WATCH;
+const targetFolder = production?'dist/':'dev_test/'
+
 
 export default {
   moduleContext: {
@@ -15,12 +18,15 @@ export default {
 	  name: 'H801',
     sourcemap: !production,  
     format: 'iife',
-    file: 'public/bundle.js',
+    file: targetFolder + 'bundle.js',
   },
   watch: {
     include: 'src/**'
   },
 	plugins: [
+    resolve({
+      browser: true,
+    }),
 		svelte({
 			// enable run-time checks when not in production
 			dev: !production,
@@ -35,16 +41,9 @@ export default {
 		}),
 
     copy({
-        "static/index.html": "public/index.html",
-        "static/iro.js/iro.min.js": "public/iro.min.js",
-        "static/font/fontello.woff": "public/icons.woff",
-        verbose: true
-    }),
-
-
-    !production && copy({
-        "static/test_files/config": "public/config",
-        "static/test_files/status": "public/status",
+        'static/index.html':          targetFolder + 'index.html',
+        'static/iro.js/iro.min.js':   targetFolder + 'iro.min.js',
+        'static/font/fontello.woff':  targetFolder + 'icons.woff',
         verbose: true
     }),
 
@@ -52,7 +51,7 @@ export default {
 		// instead of npm run dev), transpile and minify
 		production && buble({ exclude: 'node_modules/**' }),
 		production && uglify({}, minify),
-    gzip({}),
+    production && gzip({}),
 
 	]
 };

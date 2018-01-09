@@ -1,7 +1,7 @@
 <!-- HTML -->
 <form on:submit='handleSubmit( event )'>
   <div class="">
-    <ConfigGroup bind:value=config />
+    <ConfigGroup valueRender={{configRender}} bind:value=config />
   </div>
   <div class="buttons">
     <input type="button" on:click="handleRefresh( event )" class="btnRefresh" value="Get Current">
@@ -45,7 +45,9 @@ import { restGET, restPOST, displayError } from '../util.js';
 export default {
   data () {
     return {
-      config: {}
+      info: {},
+      config: {},
+      configRender: {}
     }
   },
 
@@ -57,13 +59,15 @@ export default {
   oncreate () {
     var self = this;
     // Workaround for failing to set values on load
-    self.set( { config: self.get('config') } );
+    self.set({});
 
     restGET('./config', function(error, data) {
       displayError(error, true);
       if (error)
         return;
-      self.set( { config: data } );
+      // Workaround for failing to set values on load
+      self.set({});
+      self.set( { config: data, configRender: Object.assign({}, data) } );
     });
   },
 
@@ -77,7 +81,7 @@ export default {
         displayError(error, false);
         if (error)
           return;
-        self.set( { config: data } );
+        self.set( { config: data, configRender: Object.assign({}, data) } );
       });
     },
     handleSubmit: function ( event ) {
@@ -91,8 +95,15 @@ export default {
         displayError(error, false);
         if (error)
           return;
-        if (typeof data === 'object')
-          self.set( { config: data } );
+        if (typeof data === 'object') {
+          self.set( { config: data, configRender: Object.assign({}, data) } );
+
+          // Update name from config
+          if (typeof data.name === 'string' && data.name.length) {
+            document.title = data.name || '';
+            self.set( { info: { name: data.name }});
+          }
+        }
       });
 
     }

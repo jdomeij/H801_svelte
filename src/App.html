@@ -1,7 +1,7 @@
 <!-- HTML -->
 <div id="H801">
   <div class="title">
-    <label>{{title}}</label>
+    <label>{{info.name || 'H801'}}</label>
     <a class="tooltip {{(page == 'PWM') ? 'active' : ''}}" href="./{{baseURI}}?p=PWM">
       <i class="icon-sliders"></i>
       <span>H801 PWM Control</span>
@@ -14,33 +14,43 @@
       <i class="icon-wrench"></i>
       <span>H801 Configuration</span>
     </a>
+    <a class="tooltip {{(page == 'Info') ? 'active' : ''}}" href="./{{baseURI}}?p=Info">
+      <i class="icon-info"></i>
+      <span>H801 Info</span>
+    </a>
   </div>
 {{#if page === 'Config'}}
-  <Config/>
+  <Config bind:info=info/>
 {{elseif page === 'Color'}}
   <Color/>
 {{elseif page === 'PWM'}}
   <PWM/>
+{{elseif page === 'Info'}}
+  <Info bind:value=info/>
 {{/if}}
 </div>
 
 <div id="errorArea"></div>
- 
 
- <!-- CSS -->
+
+<!-- CSS -->
 <style>
   #errorArea,
   #H801 {
     color: #333333;
-    background-color: #416a98;
-    font-family:Helvetica, Arial, Sans-Serif;
     font-size:12px;
-    display: block;
-    margin: 60px auto 0 auto; 
-    max-width: 370px;
-    background-color: #eaeaea;
+    font-family:Helvetica, Arial, Sans-Serif;
+
+    width: 370px;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
     padding: 0;
+    margin: 30px auto 0 auto;
+  }
+
+  #H801 {
+    margin-top: 50px;
+    display: block;
+    background-color: #eaeaea;
   }
 
   #errorArea {
@@ -82,6 +92,10 @@
     font-size: 18px;
     font-weight: bold;
     flex-grow: 2;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: pre;
+    overflow: hidden;
   }
 
   div.title a {
@@ -182,69 +196,80 @@
   }
    
   .icon-wrench:before { content: '\e800'; } /* '' */
+  .icon-info:before { content: '\f129'; } /* '' */
   .icon-sliders:before { content: '\f1de'; } /* '' */
   .icon-eyedropper:before { content: '\f1fb'; } /* '' */
 
 </style>
-
  
- <!-- Code -->
+<!-- Code -->
 <script>
-import PWM    from './pages/PWM.html'
-import Config from './pages/Config.html'
-import Color  from './pages/Color.html'
-import { displayError } from './util.js'
+  import PWM    from './pages/PWM.html'
+  import Config from './pages/Config.html'
+  import Color  from './pages/Color.html'
+  import Info   from './pages/Info.html'
+  import { restGET, displayError } from './util.js'
 
-export default {
-  data () {
-    return {
-      title: 'H801',
-      page: '',
-      baseURI: ''
-      //baseURI: 'index.html'
+  export default {
+    data () {
+      return {
+        page: '',
+        baseURI: '',
+        info: {
+          name: ''
+        }
+      }
+    },
+
+    components: { 
+      PWM,
+      Config,
+      Color,
+      Info,
+    },
+
+    oncreate () {
+      var page = null;
+      var self = this;
+
+      // Determine wanted page
+      try {
+        const url = new URL(window.location);
+        const param = /(^\?|\&)p=([^&]*)(\&|$)/.exec(url.search);
+        page = (param != null) ? param[2].toLowerCase() : null;
+      } catch(error) {
+        displayError(error, true);
+        page = null;
+      }
+
+
+      // Determine which page we want to render
+      switch (page) {
+        case 'color':
+          this.set({page: 'Color'});
+          break;
+        case 'config':
+          this.set({page: 'Config'});
+          break;
+        case 'info':
+          this.set({page: 'Info'});
+          break;
+        case 'pwm':
+        default:
+          this.set({page: 'PWM'});
+          break;
+      }
+
+      restGET('./info', (error, data) => {
+        if (error)
+          return displayError(error);
+
+        // Workaround for failing to set values on load
+        self.set({});
+        self.set({'info': data});
+
+        document.title = data.name || '';
+      });
     }
-  },
-
-  components: { 
-    PWM,
-    Config,
-    Color,
-  },
-
-  oncreate () {
-    var page = null;
-
-    // Determine wanted page
-    try {
-      const url = new URL(window.location);
-      const param = /(^\?|\&)p=([^&]*)(\&|$)/.exec(url.search);
-      page = (param != null) ? param[2] : null;
-
-    } catch(error) {
-      displayError(error, true);
-      page = null;
-    }
-
-    // Determine which page we want to render
-    switch (page) {
-      case 'Color':
-      case 'color':
-        this.set({title: "H801 Color", page: 'Color'});
-        break;
-      case 'Config':
-      case 'config':
-        this.set({title: "H801 Configuration", page: 'Config'});
-        break;
-      case 'PWM':
-      case 'pwm':
-      default:
-        this.set({title: "H801 PWM Control", page: 'PWM'});
-        break;
-    }
-
-    document.title = this.get('title');
-  }
-} 
+  } 
 </script>
-
-
