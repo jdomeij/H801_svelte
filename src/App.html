@@ -1,40 +1,56 @@
 <!-- HTML -->
-<div id="H801">
-  <div class="title">
-    <label>{{info.name || 'H801'}}</label>
-    <a class="tooltip {{(page == 'PWM') ? 'active' : ''}}" href="./{{baseURI}}?p=PWM">
-      <i class="icon-sliders"></i>
-      <span>H801 PWM Control</span>
-    </a>
-    <a class="tooltip {{(page == 'Color') ? 'active' : ''}}" href="./{{baseURI}}?p=Color">
-      <i class="icon-eyedropper"></i>
-      <span>H801 Color Picker</span>
-    </a>
-    <a class="tooltip {{(page == 'Config') ? 'active' : ''}}" href="./{{baseURI}}?p=Config">
-      <i class="icon-wrench"></i>
-      <span>H801 Configuration</span>
-    </a>
-    <a class="tooltip {{(page == 'Info') ? 'active' : ''}}" href="./{{baseURI}}?p=Info">
-      <i class="icon-info"></i>
-      <span>H801 Info</span>
-    </a>
-  </div>
-{{#if page === 'Config'}}
-  <Config bind:info=info/>
-{{elseif page === 'Color'}}
-  <Color/>
-{{elseif page === 'PWM'}}
-  <PWM/>
-{{elseif page === 'Info'}}
-  <Info bind:value=info/>
-{{/if}}
-</div>
+<div class="center">
+  <div class="column">
 
-<div id="errorArea"></div>
+    <div id="H801">
+      <div class="title">
+        <label>{{info.name || 'H801'}}</label>
+        <a class="tooltip {{(page == 'PWM') ? 'active' : ''}}" href="./{{baseURI}}?p=PWM">
+          <i class="icon-sliders"></i>
+          <span>H801 PWM Control</span>
+        </a>
+        <a class="tooltip {{(page == 'Color') ? 'active' : ''}}" href="./{{baseURI}}?p=Color">
+          <i class="icon-eyedropper"></i>
+          <span>H801 Color Picker</span>
+        </a>
+        <a class="tooltip {{(page == 'Config') ? 'active' : ''}}" href="./{{baseURI}}?p=Config">
+          <i class="icon-wrench"></i>
+          <span>H801 Configuration</span>
+        </a>
+        <a class="tooltip {{(page == 'Info') ? 'active' : ''}}" href="./{{baseURI}}?p=Info">
+          <i class="icon-info"></i>
+          <span>H801 Info</span>
+        </a>
+      </div>
+    {{#if page === 'Config'}}
+      <Config bind:info=info/>
+    {{elseif page === 'Color'}}
+      <Color/>
+    {{elseif page === 'PWM'}}
+      <PWM/>
+    {{elseif page === 'Info'}}
+      <Info bind:value=info/>
+    {{/if}}
+    </div>
+
+    <div id="errorArea"></div>
+  </div>
+</div>
 
 
 <!-- CSS -->
 <style>
+  .center {
+    display: flex;
+    justify-content: center;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
+
+
   #errorArea,
   #H801 {
     color: #333333;
@@ -42,20 +58,19 @@
     font-family:Helvetica, Arial, Sans-Serif;
 
     width: 370px;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
     padding: 0;
-    margin: 30px auto 0 auto;
   }
 
   #H801 {
     margin-top: 50px;
-    display: block;
+    display: inline-block;
     background-color: #eaeaea;
   }
 
   #errorArea {
     display: none;
-    margin-top: 5px !important;
+    margin-top: 5px;
     background-color: #ffaaaa;
     min-height: 25px;
     line-height: 20px;
@@ -201,6 +216,7 @@
   .icon-eyedropper:before { content: '\f1fb'; } /* '' */
 
 </style>
+
  
 <!-- Code -->
 <script>

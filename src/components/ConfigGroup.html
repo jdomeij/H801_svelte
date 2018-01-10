@@ -16,7 +16,7 @@
   {{elseif typeof valueRender[prop] === 'boolean'}}
     <InputBool label={{prop}} bind:value=value[prop]/>
   {{elseif typeof valueRender[prop] === 'object'}}
-    <ConfigGroup label={{prop}} valueRender={{valueRender[prop]}} bind:value=value[prop]/>
+    <ConfigGroup label={{prop}} valueRender={{ Object.assign({}, valueRender[prop]) }} bind:value=value[prop]/>
   {{/if}}
 {{/each}}
 
@@ -39,27 +39,27 @@
 
 <!-- Code -->
 <script>
-import InputBool      from './InputBool.html';
-import InputNumber    from './InputNumber.html';
-import InputText      from './InputText.html';
-import InputPassword  from './InputPassword.html';
+  import InputBool      from './InputBool.html';
+  import InputNumber    from './InputNumber.html';
+  import InputText      from './InputText.html';
+  import InputPassword  from './InputPassword.html';
 
-export default {
-  data () {
-    return {
-      label: '',
-      value: {},
-      valueRender: {}
-    }
-  },
-  components: { 
-    ConfigGroup,
-    InputBool,
-    InputNumber,
-    InputText,
-    InputPassword,
-  },
-};
+  export default {
+    data () {
+      return {
+        label: '',
+        value: {},
+        valueRender: {}
+      }
+    },
+    components: { 
+      ConfigGroup,
+      InputBool,
+      InputNumber,
+      InputText,
+      InputPassword,
+    },
+  };
 </script>
 
 

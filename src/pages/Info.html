@@ -6,6 +6,7 @@
   </div>
 </div>
 
+
 <!-- CSS -->
 <style>
   div.buttons {
@@ -33,34 +34,33 @@
 
 <!-- Code -->
 <script>
+  import InfoRows from '../components/InfoRows.html';
+  import { restGET, displayError } from '../util.js';
 
-import InfoRows      from '../components/InfoRows.html';
-import { restGET, displayError } from '../util.js';
-
-export default {
-  data () {
-    return {
-      value: {}
-    }
-  },
-
-  components: {
-    InfoRows
-  },
-
-  methods: {
-    handleRefresh: function ( event ) {
-      // prevent the page from reloading
-      event.preventDefault();
-
-      var self = this;
-      restGET('./info', function(error, data) {
-        displayError(error, false);
-        if (error)
-          return;
-        self.set( { value: data } );
-      });
+  export default {
+    data () {
+      return {
+        value: {}
+      }
     },
-  }
-};
+
+    components: {
+      InfoRows
+    },
+
+    methods: {
+      handleRefresh: function ( event ) {
+        // prevent the page from reloading
+        event.preventDefault();
+
+        var self = this;
+        restGET('./info', function(error, data) {
+          displayError(error, false);
+          if (error)
+            return;
+          self.set( { value: data } );
+        });
+      },
+    }
+  };
 </script>

@@ -1,7 +1,7 @@
 <!-- HTML -->
 <form on:submit='handleSubmit( event )'>
   <div class="">
-    <ConfigGroup valueRender={{configRender}} bind:value=config />
+    <ConfigGroup valueRender={{ configRender }} bind:value=config />
   </div>
   <div class="buttons">
     <input type="button" on:click="handleRefresh( event )" class="btnRefresh" value="Get Current">
@@ -38,75 +38,79 @@
 
 <!-- Code -->
 <script>
-import ConfigGroup from '../components/ConfigGroup.html';
-import DebugArea from '../components/DebugArea.html';
-import { restGET, restPOST, displayError } from '../util.js';
+  import ConfigGroup from '../components/ConfigGroup.html';
+  import DebugArea from '../components/DebugArea.html';
+  import { restGET, restPOST, displayError } from '../util.js';
 
-export default {
-  data () {
-    return {
-      info: {},
-      config: {},
-      configRender: {}
-    }
-  },
+  export default {
+    data () {
+      return {
+        info: {},
+        config: {},
+        configRender: {}
+      }
+    },
 
-  components: {
-    ConfigGroup,
-    DebugArea
-  },
+    components: {
+      ConfigGroup,
+      DebugArea
+    },
 
-  oncreate () {
-    var self = this;
-    // Workaround for failing to set values on load
-    self.set({});
-
-    restGET('./config', function(error, data) {
-      displayError(error, true);
-      if (error)
-        return;
+    oncreate () {
+      var self = this;
       // Workaround for failing to set values on load
       self.set({});
-      self.set( { config: data, configRender: Object.assign({}, data) } );
-    });
-  },
 
-  methods: {
-    handleRefresh: function ( event ) {
-      // prevent the page from reloading
-      event.preventDefault();
-
-      var self = this;
       restGET('./config', function(error, data) {
-        displayError(error, false);
+        displayError(error, true);
         if (error)
           return;
-        self.set( { config: data, configRender: Object.assign({}, data) } );
+        // Workaround for failing to set values on load
+        self.set({});
+        var configRender = JSON.parse(JSON.stringify(data));
+        self.set( { config: data, configRender: configRender } );
+
       });
     },
-    handleSubmit: function ( event ) {
-      // prevent the page from reloading
-      event.preventDefault();
 
-      var self = this;
-      var value = this.get('config');
+    methods: {
+      handleRefresh: function ( event ) {
+        // prevent the page from reloading
+        event.preventDefault();
 
-      restPOST('./config', value, function(error, data) {
-        displayError(error, false);
-        if (error)
-          return;
-        if (typeof data === 'object') {
-          self.set( { config: data, configRender: Object.assign({}, data) } );
+        var self = this;
+        restGET('./config', function(error, data) {
+          displayError(error, false);
+          if (error)
+            return;
+          var configRender = JSON.parse(JSON.stringify(data));
+          self.set( { config: data, configRender: configRender } );
+        });
+      },
+      handleSubmit: function ( event ) {
+        // prevent the page from reloading
+        event.preventDefault();
 
-          // Update name from config
-          if (typeof data.name === 'string' && data.name.length) {
-            document.title = data.name || '';
-            self.set( { info: { name: data.name }});
+        var self = this;
+        var value = this.get('config');
+
+        restPOST('./config', value, function(error, data) {
+          displayError(error, false);
+          if (error)
+            return;
+          if (typeof data === 'object') {
+            var configRender = JSON.parse(JSON.stringify(data));
+            self.set( { config: data, configRender: configRender } );
+
+            // Update name from config
+            if (typeof data.name === 'string' && data.name.length) {
+              document.title = data.name || '';
+              self.set( { info: { name: data.name }});
+            }
           }
-        }
-      });
+        });
 
+      }
     }
-  }
-};
+  };
 </script>

@@ -1,7 +1,7 @@
 <!-- HTML -->
 <div class="valueRow">
   <label>{{label}}:</label>
-  <input type="number" bind:value=value >
+  <input type="number" bind:value=value class="{{typeof value!=='number' || isNaN(value)?'error':''}}">
 </div>
 
 
@@ -37,19 +37,24 @@
     text-align: right;
     vertical-align: middle;
   }
+
+  input.error,
+  input:invalid {
+    box-shadow: 0 0 2px 2px rgba(255, 0, 0, 0.6);
+  }
 </style>
 
 
 <!-- Code -->
 <script>
-export default {
-  data () {
-    return {
-      label: '',
-      value: ''
-    }
-  },
-  components: { 
-  },
-};
+  export default {
+    data () {
+      return {
+        label: '',
+        value: ''
+      }
+    },
+    components: { 
+    },
+  };
 </script>

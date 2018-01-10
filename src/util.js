@@ -11,14 +11,14 @@ function displayError(error, appendText) {
   if (appendText === true && errorArea.innerHTML.length !== 0) {
     if (error !== null) {
       errorArea.innerHTML += '<br>' + error.toString();
-      errorArea.style.display = 'block';
+      errorArea.style.display = 'inline-block';
     }
   }
 
   // Clear errors between each calls
   else if (error !== null) {
     errorArea.innerHTML = error.toString()
-    errorArea.style.display = 'block';
+    errorArea.style.display = 'inline-block';
   }
 
   // Clear error area

@@ -52,72 +52,72 @@
 
 <!-- Code -->
 <script>
-import InputSlider from '../components/InputSlider.html';
-import DebugArea from '../components/DebugArea.html';
+  import InputSlider from '../components/InputSlider.html';
+  import DebugArea from '../components/DebugArea.html';
 
-import { restGET, restPOST, displayError } from '../util.js';
+  import { restGET, restPOST, displayError } from '../util.js';
 
-export default {
-  data () {
-    return {
-      value: {
-      },
-      colors: {
-        'R': '#f00',
-        'G': '#0f0',
-        'B': '#00f'
-      },
-      duration: 1.0
-    }
-  },
-
-  components: { 
-    InputSlider,
-    DebugArea
-  },
-
-  oncreate () {
-    var self = this;    
-    // Workaround for failing to set values on load
-    self.set( { value: self.get('value') } );
-
-    restGET('./status', function(error, data) {
-      if (error) {
-        displayError(error, true);
-        return;
+  export default {
+    data () {
+      return {
+        value: {
+        },
+        colors: {
+          'R': '#f00',
+          'G': '#0f0',
+          'B': '#00f'
+        },
+        duration: 1.0
       }
-      self.set( { value: data } );
-    });
-  },
+    },
 
-  methods: {
-    handleRefresh: function ( event ) {
-      // prevent the page from reloading
-      event.preventDefault();
+    components: { 
+      InputSlider,
+      DebugArea
+    },
 
-      var self = this;
+    oncreate () {
+      var self = this;    
+      // Workaround for failing to set values on load
+      self.set( { value: self.get('value') } );
+
       restGET('./status', function(error, data) {
-        displayError(error, false);
-        if (error)
+        if (error) {
+          displayError(error, true);
           return;
+        }
         self.set( { value: data } );
       });
     },
 
-    handleSubmit: function ( event ) {
-      // prevent the page from reloading
-      event.preventDefault();
+    methods: {
+      handleRefresh: function ( event ) {
+        // prevent the page from reloading
+        event.preventDefault();
 
-      // Get value and create shallow copy
-      var value = Object.assign({}, this.get( 'value' ));
-  
-      // Convert duration to ms
-      value.duration = Math.floor(this.get('duration') * 10) * 100;
+        var self = this;
+        restGET('./status', function(error, data) {
+          displayError(error, false);
+          if (error)
+            return;
+          self.set( { value: data } );
+        });
+      },
 
-      restPOST('./status', value, function(error) {
-        displayError(error, false);
-      });
+      handleSubmit: function ( event ) {
+        // prevent the page from reloading
+        event.preventDefault();
+
+        // Get value and create shallow copy
+        var value = Object.assign({}, this.get( 'value' ));
+    
+        // Convert duration to ms
+        value.duration = Math.floor(this.get('duration') * 10) * 100;
+
+        restPOST('./status', value, function(error) {
+          displayError(error, false);
+        });
+      }
     }
-  }
-};
+  };
 </script>
