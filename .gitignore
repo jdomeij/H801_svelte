@@ -65,3 +65,5 @@ dev_test/iro.min.js
 dist
 package-lock.json
 
+dev_test/iro.min.js.map
+dev_test/iro.js.map

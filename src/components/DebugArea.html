@@ -1,8 +1,7 @@
 <!-- HTML -->
 {{#if debug === true}}
   <div id="debugArea">
-    <label>Debug:</label>
-    <pre>{{JSON.stringify(value, null, 2)}}</pre>
+    <label>Debug:</label><pre>{{JSON.stringify(value, (k,v) => { return v === undefined ? '(undefined)': v; }, 2)}}</pre>
   </div>
 {{/if}}
 
@@ -10,7 +9,7 @@
 <!-- CSS -->
 <style>
   #debugArea {
-    margin: 10px 0;
+    margin: 10px;
     white-space: pre;
     font-family: Courier;
     background-color: #faa;

@@ -54,7 +54,7 @@
         event.preventDefault();
 
         var self = this;
-        restGET('./info', function(error, data) {
+        restGET('./info', (error, data) => {
           displayError(error, false);
           if (error)
             return;

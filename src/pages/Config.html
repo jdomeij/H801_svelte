@@ -61,28 +61,24 @@
       // Workaround for failing to set values on load
       self.set({});
 
-      restGET('./config', function(error, data) {
-        displayError(error, true);
-        if (error)
-          return;
-        // Workaround for failing to set values on load
-        self.set({});
-        var configRender = JSON.parse(JSON.stringify(data));
-        self.set( { config: data, configRender: configRender } );
-
-      });
+      this.handleRefresh(null);
     },
 
     methods: {
       handleRefresh: function ( event ) {
         // prevent the page from reloading
-        event.preventDefault();
+        if (event)
+          event.preventDefault();
 
         var self = this;
-        restGET('./config', function(error, data) {
+        restGET('./config', (error, data) => {
           displayError(error, false);
           if (error)
             return;
+
+          // Workaround for "TypeError: state.value is undefined"
+          self.set({});
+
           var configRender = JSON.parse(JSON.stringify(data));
           self.set( { config: data, configRender: configRender } );
         });
@@ -94,7 +90,9 @@
         var self = this;
         var value = this.get('config');
 
-        restPOST('./config', value, function(error, data) {
+        console.log(value);
+
+        restPOST('./config', value, (error, data) => {
           displayError(error, false);
           if (error)
             return;

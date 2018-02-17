@@ -1,31 +1,9 @@
 <!-- HTML -->
-<div class="valueRow">
-  <label>{{label}}:</label>
-  <input type="number" bind:value=value class="{{typeof value!=='number' || isNaN(value)?'error':''}}">
-</div>
-
+<input type="number" bind:value=value class="{{typeof value!=='number' || isNaN(value)?'error':''}}">
 
 <!-- CSS -->
 <style>
-  .valueRow {
-    display: flex;
-    justify-content: flex-start;
-    height: 35px;
-    line-height:35px;
-    margin: 0 0 0 15px;
-  }
-
-  label {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: pre;
-    min-width: 100px;
-    text-align: right;
-    margin-right: 20px;
-  }
-
-  input {
+ input {
     display: inline-block;
     flex-grow: 2;
     height: 18px;
@@ -50,7 +28,6 @@
   export default {
     data () {
       return {
-        label: '',
         value: ''
       }
     },

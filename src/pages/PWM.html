@@ -2,20 +2,34 @@
 <form on:submit='handleSubmit( event )'>
   <div>
     {{#each Object.keys(value) as key}}
-      <InputSlider  label={{key}}
-                    bind:value=value[key]
-                    limitMax=255
-                    colorMax={{colors.hasOwnProperty(key)?colors[key]:'#fff'}}
-                    />
+      <div class="row">
+        <label>{{key}}:</label>
+        <InputSlider  label={{key}}
+                      bind:value=value[key]
+                      limitMax=255
+                      colorMax={{colors.hasOwnProperty(key)?colors[key]:'#fff'}}
+                      />
+        <span>{{value[key]}}</span>
+      </div>
     {{/each}}
-    <InputSlider  label=duration
-                  bind:value=duration
-                  limitMax=60
-                  limitStep=0.1 
-                  colorMin='#aaa'
-                  colorMax='#aaa'
-                  valueSuffix=s
-                  /> 
+
+    <div class="row">
+      <label>duration:</label>
+
+      <InputSlider  label=duration
+                    bind:value=duration
+                    limitMax=60
+                    limitStep=0.1 
+                    colorMin='#aaa'
+                    colorMax='#aaa'
+                    valueSuffix=s
+                    /> 
+      <span>{{duration}}s</span>
+    </div>
+  </div>
+  <div class="row">
+    <InputCheckbox label={{'Autopost'}} bind:value=autoPost/>
+    <label>&nbsp;auto submit</label>
   </div>
   <div class="buttons">
     <input type="button" on:click="handleRefresh( event )" class="btnRefresh" value="Get Current">
@@ -23,11 +37,34 @@
   </div>
 </form>
 
-<DebugArea bind:value=value />
+<DebugArea value={{value}} />
 
 
 <!-- CSS -->
 <style>
+  .row {
+    display: flex;
+    justify-content: flex-start;
+    height: 35px;
+    line-height:35px;
+    margin: 0 0 0 15px;
+  }
+
+  .row label {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: pre;
+    min-width: 40px;
+    text-align: right;
+    margin-right: 20px;
+  }
+
+  .row span {
+    min-width: 40px;
+    text-align: left;
+  }
+
   div.buttons {
     margin-top: 10px;
     display: flex;
@@ -53,60 +90,101 @@
 <!-- Code -->
 <script>
   import InputSlider from '../components/InputSlider.html';
+  import InputCheckbox from '../components/InputCheckbox.html';
   import DebugArea from '../components/DebugArea.html';
-
-  import { restGET, restPOST, displayError } from '../util.js';
+  import { restGET, restPOST, displayError, throttle } from '../util.js';
 
   export default {
     data () {
       return {
         value: {
         },
+        prevValue: {
+        },
         colors: {
           'R': '#f00',
           'G': '#0f0',
           'B': '#00f'
         },
+        autoPost: true,
         duration: 1.0
       }
     },
 
     components: { 
       InputSlider,
+      InputCheckbox,
       DebugArea
     },
 
     oncreate () {
-      var self = this;    
-      // Workaround for failing to set values on load
-      self.set( { value: self.get('value') } );
+      var self = this;
+      var ignoreSetEvent = false;
 
-      restGET('./status', function(error, data) {
-        if (error) {
-          displayError(error, true);
+      var throttlePOST = throttle((value) => {
+          console.log(value);
+          restPOST('./status', value, (error) => {
+            displayError(error, false);
+          });
+        }, 250, self);
+
+      // On change function
+      function observeValueFunc(oldValues, newValues) {
+        if (self.get('ignoreSetEvent') === true)
           return;
-        }
-        self.set( { value: data } );
-      });
+
+        var prevValue = self.get('prevValue');
+
+        var value = Object.keys(newValues).reduce((coll, key, val) => {
+          if (newValues.hasOwnProperty(key) && prevValue[key] !== newValues[key])
+            coll[key] = newValues[key];
+          return coll;
+        }, {})
+
+        self.set( { prevValue: Object.assign({}, newValues) });
+
+        if (self.get('autoPost') === false)
+          return;
+
+        // Convert duration to ms
+        value.duration = Math.floor(this.get('duration') * 10) * 100;
+
+        throttlePOST(value);
+      }
+
+      // Listen for changes
+      self.observe('value', 
+                   observeValueFunc, 
+                   { init: false });
+
+
+      // Get initial data
+      self.handleRefresh(null);
     },
 
     methods: {
       handleRefresh: function ( event ) {
         // prevent the page from reloading
-        event.preventDefault();
+        if (event)
+          event.preventDefault();
 
         var self = this;
-        restGET('./status', function(error, data) {
+        restGET('./status', (error, data) => {
           displayError(error, false);
           if (error)
             return;
-          self.set( { value: data } );
+
+          // ignore this event so we don't post our-own value
+          self.set({ignoreSetEvent: true});
+          self.set( { value: data, prevValue: Object.assign({}, data)} );
+          self.set({ignoreSetEvent: false});
         });
       },
 
       handleSubmit: function ( event ) {
         // prevent the page from reloading
-        event.preventDefault();
+        if (event)
+          event.preventDefault();
 
         // Get value and create shallow copy
         var value = Object.assign({}, this.get( 'value' ));
@@ -114,7 +192,9 @@
         // Convert duration to ms
         value.duration = Math.floor(this.get('duration') * 10) * 100;
 
-        restPOST('./status', value, function(error) {
+        console.log(value);
+
+        restPOST('./status', value, (error) => {
           displayError(error, false);
         });
       }

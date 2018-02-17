@@ -1,0 +1,66 @@
+<!-- HTML -->
+<label class="{{value===true?'checked':''}}"><input class="check" type="checkbox" bind:checked=value /></label>
+
+<!-- CSS -->
+<style>
+  label {
+    margin: auto 0;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+
+    cursor: pointer;
+    position: relative;
+    background: -webkit-gradient(linear, left top, left bottom, from(#222222), to(#45484d));
+    background: linear-gradient(to bottom, #222222 0%, #45484d 100%);
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.4);
+            box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.4);
+  }
+
+  input {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+  }
+
+  label:after {
+    content: '';
+    width: 9px;
+    height: 5px;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    border: 3px solid #fcfff4;
+    border-top: none;
+    border-right: none;
+    background: transparent;
+    opacity: 0;
+    -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+  }
+  label:hover::after {
+    opacity: 0.3;
+  }
+  input {
+    opacity: 0;
+  }
+  label.checked:after {
+    opacity: 1;
+  }
+</style>
+
+
+<!-- Code -->
+<script>
+  export default {
+    data () {
+      return {
+        value: true
+      }
+    },
+    components: { 
+    },
+  };
+</script>
+

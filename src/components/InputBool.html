@@ -1,48 +1,27 @@
 <!-- HTML -->
-<div class="valueRow">
-  <label class="label">{{label}}:</label>
-  <label class="switch">
-    <input class="switch" type="checkbox" bind:checked=value />
-    <span class="slider"></span>
-  </label>
-</div>
+<label>
+  <input type="checkbox" bind:checked=value />
+  <span></span>
+</label>
 
 
 <!-- CSS -->
 <style>
-  .valueRow {
-    display: flex;
-    justify-content: flex-start;
-    height: 35px;
-    line-height:35px;
-    margin: 0 0 0 15px;
-  }
-
-  label.label {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: bold;
-    margin-right: 20px;
-    min-width: 100px;
-    text-align: right;
-    white-space: pre;
-  }
-
-  label.switch {
+  label {
     position: relative;
     display: inline-block;
     width: 60px;
     height: 34px;
   }
 
-  label.switch input[type=checkbox] {
+  label input {
     display:none;
     width: 60px;
     height: 35px;
   }
 
   /* The slider */
-  label.switch .slider {
+  span {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -54,7 +33,7 @@
     transition: .4s;
   }
 
-  label.switch .slider:before {
+  span:before {
     position: absolute;
     content: "";
     height: 26px;
@@ -66,15 +45,15 @@
     transition: .4s;
   }
 
-  label.switch input[type=checkbox]:checked + .slider {
+  input:checked + span {
     background-color: #5b8dad;
   }
 
-  label.switch input[type=checkbox]:focus + .slider {
+  input:focus + span {
     box-shadow: 0 0 1px #5b8dad;
   }
 
-  label.switch input[type=checkbox]:checked + .slider:before {
+  input:checked + span:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
@@ -87,7 +66,6 @@
   export default {
     data () {
       return {
-        label: '',
         value: false
       }
     },

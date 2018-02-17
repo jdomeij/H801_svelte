@@ -1,35 +1,60 @@
 <!-- HTML -->
 {{#if label.length}}
-  <div class="valueGroup">
+  <div class="group">
     <label>{{label}}</label>
   </div>
 {{/if}}
 {{#each Object.keys(valueRender) as prop}}
-  {{#if typeof valueRender[prop] === 'string'}}
-    {{#if prop.substr(-5) === 'passw'}}
-      <InputPassword label={{prop}} bind:value=value[prop]/>
-    {{else}}
-      <InputText label={{prop}} bind:value=value[prop]/>
-    {{/if}}
-  {{elseif typeof valueRender[prop] === 'number'}}
-    <InputNumber label={{prop}} bind:value=value[prop]/>
-  {{elseif typeof valueRender[prop] === 'boolean'}}
-    <InputBool label={{prop}} bind:value=value[prop]/>
-  {{elseif typeof valueRender[prop] === 'object'}}
-    <ConfigGroup label={{prop}} valueRender={{ Object.assign({}, valueRender[prop]) }} bind:value=value[prop]/>
+  {{#if typeof valueRender[prop] === 'object'}}
+    <:Self label={{prop}} valueRender={{ Object.assign({}, valueRender[prop]) }} bind:value=value[prop] />
+  {{else}}
+    <div class="row">
+      <label>{{prop}}</label>
+      {{#if typeof valueRender[prop] === 'string'}}
+        {{#if prop.substr(-5) === 'passw'}}
+          <InputPassword bind:value=value[prop]/>
+        {{else}}
+          <InputText bind:value=value[prop]/>
+        {{/if}}
+      {{elseif typeof valueRender[prop] === 'number'}}
+        <InputNumber bind:value=value[prop]/>
+      {{elseif typeof valueRender[prop] === 'boolean'}}
+        <InputBool bind:value=value[prop]/>
+      {{elseif typeof valueRender[prop] === 'object'}}
+        <:Self valueRender={{ Object.assign({}, valueRender[prop]) }} bind:value=value[prop] />
+      {{/if}}
+    </div>
   {{/if}}
 {{/each}}
 
 
 <!-- CSS -->
 <style>
-  .valueGroup {
+  .row {
+    display: flex;
+    justify-content: flex-start;
+    height: 35px;
+    line-height:35px;
+    margin: 0 0 0 15px;
+  }
+
+  .row label {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: pre;
+    min-width: 100px;
+    text-align: right;
+    margin-right: 20px;
+  }
+
+  .group {
     margin: 10px 0 4px 10px;
     font-size: 18px;
     font-weight: bold;
   }
 
-  .valueGroup label {
+  .group label {
     margin: 0 10px 0 0;
     border-bottom: 2px solid #aaa;
     display:block;
@@ -53,7 +78,6 @@
       }
     },
     components: { 
-      ConfigGroup,
       InputBool,
       InputNumber,
       InputText,

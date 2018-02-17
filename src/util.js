@@ -25,6 +25,9 @@ function displayError(error, appendText) {
   else {
     errorArea.style.display = 'none';
   }
+
+  //if (error)
+  //  throw error;
 }
 
 function restTimeout(ms, promise) {
@@ -104,4 +107,27 @@ function restPOST(uri, jsonData, callback) {
 }
 
 
-export { restGET, restPOST, displayError };
+function throttle(fn, threshhold, scope) {
+  var last;
+  var deferTimer;
+  threshhold || (threshhold = 250);
+  return function () {
+    var context = scope || this;
+
+    var now = Date.now();
+    var args = arguments;
+    if (last && now < last + threshhold) {
+      clearTimeout(deferTimer);
+      deferTimer = setTimeout(function () {
+        last = now;
+        fn.apply(context, args);
+      }, threshhold);
+    } else {
+      last = now;
+      fn.apply(context, args);
+    }
+  };
+}
+
+
+export { restGET, restPOST, displayError, throttle };

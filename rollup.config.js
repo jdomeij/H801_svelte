@@ -16,6 +16,7 @@ export default {
 	input: 'src/main.js',	
 	output: {
 	  name: 'H801',
+    // Skip in production to remove the include in the js file
     sourcemap: !production,  
     format: 'iife',
     file: targetFolder + 'bundle.js',
@@ -42,10 +43,21 @@ export default {
 
     copy({
         'static/index.html':          targetFolder + 'index.html',
-        'static/iro.js/iro.min.js':   targetFolder + 'iro.min.js',
         'static/font/fontello.woff':  targetFolder + 'icons.woff',
         verbose: true
     }),
+
+    production && copy({
+      'static/iro.js/iro.js':         targetFolder + 'iro.min.js',
+    }),
+    
+    !production && copy({
+        'static/iro.js/iro.js':       targetFolder + 'iro.min.js',
+        'static/iro.js/iro.js.map':   targetFolder + 'iro.js.map',
+        'static/iro.js/iro.min.js.map':   targetFolder + 'iro.min.js.map',
+        verbose: true
+    }),
+
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), transpile and minify

@@ -2,12 +2,27 @@
 <form onsubmit="#">
   <div id="colorPicker"></div>
   <br>
-  <InputSlider label=duration bind:value=value.duration
-                limitMax=20 limitStep=0.1 
-                colorMin='#aaa' colorMax='#aaa'
-                valueSuffix=s
-                /> 
-  <br>
+  <div class="row">
+    <label>duration:</label>
+
+    <InputSlider  label=duration
+                  bind:value=duration
+                  limitMax=60
+                  limitStep=0.1 
+                  colorMin='#aaa'
+                  colorMax='#aaa'
+                  valueSuffix=s
+                  /> 
+    <span>{{duration}}s</span>
+  </div>
+  <div class="row">
+    <InputCheckbox label={{'Autopost'}} bind:value=autoPost/>
+    <label>&nbsp;auto submit</label>
+  </div>
+  <div class="buttons">
+    <input type="button" on:click="handleRefresh( event )" class="btnRefresh" value="Get Current">
+    <input type="button" on:click="handleSubmit( event )"  class="btnPost" value="Set Values">
+  </div>
 </form>
 
 <DebugArea bind:value=value />
@@ -15,9 +30,52 @@
 
 <!-- CSS -->
 <style>
+  .row {
+    display: flex;
+    justify-content: flex-start;
+    height: 35px;
+    line-height:35px;
+    margin: 0 0 0 15px;
+  }
+
+  .row label {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: pre;
+    min-width: 40px;
+    text-align: right;
+    margin-right: 20px;
+  }
+
+  .row span {
+    min-width: 40px;
+    text-align: left;
+  }
+
   #colorPicker {
     border-bottom: 2px solid #cacaca;
     padding-bottom: 14px;
+  }
+
+  div.buttons {
+    margin-top: 10px;
+    display: flex;
+    background-color: #ccc;
+    padding: 10px 15px;
+  }
+
+  div.buttons input[type=button]:hover {
+    background-color: #3b6989;
+  }
+
+  div.buttons input[type=button] {
+    background-color: #5b8dad;
+    border: 0;
+    color: #ffffff;
+    flex-grow: 1;
+    margin: 2px 10px;
+    padding: 8px 10px;
   }
 </style>
 
@@ -25,10 +83,10 @@
 <!-- Code -->
 <script>
   import InputSlider from '../components/InputSlider.html';
+  import InputCheckbox from '../components/InputCheckbox.html';
   import DebugArea from '../components/DebugArea.html';
-  import { restGET, restPOST, displayError } from '../util.js'
+  import { restGET, restPOST, displayError, throttle } from '../util.js'
 
-  var colorPicker = null;
   var lastPost = (new Date()).getTime();
   export default {
     data () {
@@ -37,76 +95,69 @@
           R: 0,
           G: 0,
           B: 0,
-          duration: 1.0
-        }
+        },
+        ignoreSetEvent: false,
+        duration: 1.0,
+        autoPost: true,
+        colorPicker: null,
       }
     },
 
     components: { 
       InputSlider,
+      InputCheckbox,
       DebugArea
     },
 
     oncreate () {
       var self = this;
+
       // Workaround for failing to set values on load
       self.set({});
 
-      colorPicker = new iro.ColorPicker('#colorPicker', {
+      var colorPicker = new iro.ColorPicker('#colorPicker', {
         width: 370
       });
 
-      colorPicker.on("color:change", function(color, changes) {
-        var currTime = (new Date()).getTime();
 
-        // Get value and create shallow copy
-        var value = Object.assign({}, self.get( 'value' ));
+      self.set({ colorPicker: colorPicker});
 
-        value.R = color.rgb.r || 0;
-        value.G = color.rgb.g || 0;
-        value.B = color.rgb.b || 0;
-        self.set({ value: value });
-
-        // Limit to 250ms between each post
-        if (currTime > lastPost && currTime - lastPost < 250)
-          return;
-        lastPost = currTime;
-
-        // Create shallow copy      
-        value = Object.assign({}, value);
-
-        // Convert duration to ms
-        value.duration = Math.floor(value.duration * 10) * 100;
-
-        restPOST('./status', value, function(error) {
-          displayError(error, false);
-          if (error)
-            return;
-        });
-      });
-
-      // Simple documnet ready function
+      // Simple document ready function
       function onDocReady(func){
         /in/.test(document.readyState)?setTimeout(onDocReady,9,func):func()
       }
-      
-      // colorPicker.color is undefined on load, need to wait for document ready
-      restGET('./status', function(error, data) {
-        displayError(error, true);
-        if (error)
-          return;
-        onDocReady(function(){
 
+      // Throttled post function
+      var throttlePOST = throttle(self.handleSubmit.bind(self), 250, self);
+
+
+      // Delay event attachment until so we don't trigger on the initial trigger
+      onDocReady(function() {
+        colorPicker.on("color:change", (color, changes) => {
           // Get value and create shallow copy
           var value = Object.assign({}, self.get( 'value' ));
 
-          value.R = data.R || 0;
-          value.G = data.G || 0;
-          value.B = data.B || 0;
+          value.R = color.rgb.r || 0;
+          value.G = color.rgb.g || 0;
+          value.B = color.rgb.b || 0;
+
           self.set({ value: value });
 
-          if (colorPicker)
-            colorPicker.color.set({r: data.R || 0, g: data.G || 0, b: data.B || 0 });
+          if (self.get('autoPost') === false)
+            return;
+
+          if (self.get('ignoreSetEvent') !== true)
+            throttlePOST();
+        });
+      });
+      
+      // colorPicker.color is undefined on load, need to wait for document ready
+      restGET('./status', (error, data) => {
+        displayError(error, true);
+        if (error)
+          return;
+        onDocReady(() => {
+          self.updateValues(data);
         });
       });
     },
@@ -116,6 +167,54 @@
     },
 
     methods: {
+      updateValues: function(data) {
+        // Get value and create shallow copy
+        var value = Object.assign({}, this.get( 'value' ));
+
+        value.R = data.R || 0;
+        value.G = data.G || 0;
+        value.B = data.B || 0;
+
+        this.set({ value: value });
+
+        // ignore this event so we don't re-post the values
+        this.set({ignoreSetEvent: true});
+        var colorPicker = this.get('colorPicker');
+        if (colorPicker)
+          colorPicker.color.set({r: data.R || 0, g: data.G || 0, b: data.B || 0 });
+        this.set({ignoreSetEvent: false});
+      },
+
+
+      handleRefresh: function ( event ) {
+        // prevent the page from reloading
+        if (event)
+          event.preventDefault();
+
+        var self = this;
+        restGET('./status', (error, data) => {
+          if (data)
+            self.updateValues(data);
+        });
+      },
+
+      handleSubmit: function ( event ) {
+        // prevent the page from reloading
+        if (event)
+          event.preventDefault();
+
+        // Get value and create shallow copy
+        var value = Object.assign({}, this.get( 'value' ));
+    
+        // Convert duration to ms
+        value.duration = Math.floor(this.get('duration') * 10) * 100;
+
+        console.log(value);
+
+        restPOST('./status', value, (error) => {
+          displayError(error, false);
+        });
+      }
     }
   }
 </script>
