@@ -1,36 +1,28 @@
+<:Window on:hashchange='onWindowChange()' />
+
 <!-- HTML -->
 <div class="center">
   <div class="column">
-
     <div id="H801">
       <div class="title">
         <label>{{info.name || 'H801'}}</label>
-        <a class="tooltip {{(page == 'PWM') ? 'active' : ''}}" href="./{{baseURI}}?p=PWM">
-          <i class="icon-sliders"></i>
-          <span>H801 PWM Control</span>
-        </a>
-        <a class="tooltip {{(page == 'Color') ? 'active' : ''}}" href="./{{baseURI}}?p=Color">
-          <i class="icon-eyedropper"></i>
-          <span>H801 Color Picker</span>
-        </a>
-        <a class="tooltip {{(page == 'Config') ? 'active' : ''}}" href="./{{baseURI}}?p=Config">
-          <i class="icon-wrench"></i>
-          <span>H801 Configuration</span>
-        </a>
-        <a class="tooltip {{(page == 'Info') ? 'active' : ''}}" href="./{{baseURI}}?p=Info">
-          <i class="icon-info"></i>
-          <span>H801 Info</span>
-        </a>
+        {{#each pageList as item}}
+          <a  class="tooltip {{(page == item.link) ? 'active' : ''}}" 
+              href="./{{baseURI}}#{{item.link}}" > 
+            <i class="{{item.icon}}"></i>
+            <span>{{item.desc}}</span>
+          </a>
+        {{/each}}
       </div>
-    {{#if page === 'Config'}}
-      <Config bind:info=info/>
-    {{elseif page === 'Color'}}
-      <Color/>
-    {{elseif page === 'PWM'}}
-      <PWM/>
-    {{elseif page === 'Info'}}
-      <Info bind:value=info/>
-    {{/if}}
+      {{#if page === 'Config'}}
+        <Config bind:info=info/>
+      {{elseif page === 'Color'}}
+        <Color/>
+      {{elseif page === 'PWM'}}
+        <PWM/>
+      {{elseif page === 'Info'}}
+        <Info bind:value=info/>
+      {{/if}}
     </div>
 
     <div id="errorArea"></div>
@@ -233,7 +225,29 @@
         baseURI: '',
         info: {
           name: ''
-        }
+        },
+        pageList: [
+          {
+            link: 'PWM',
+            icon: 'icon-sliders',
+            desc: 'PWM Control'
+          },
+          {
+            link: 'Color',
+            icon: 'icon-eyedropper',
+            desc: 'Color Picker'
+          },
+          {
+            link: 'Config',
+            icon: 'icon-wrench',
+            desc: 'Configuration'
+          },
+          {
+            link: 'Info',
+            icon: 'icon-info',
+            desc: 'Info'
+          },
+        ]
       }
     },
 
@@ -245,36 +259,10 @@
     },
 
     oncreate () {
-      var page = null;
       var self = this;
 
-      // Determine wanted page
-      try {
-        const url = new URL(window.location);
-        const param = /(^\?|\&)p=([^&]*)(\&|$)/.exec(url.search);
-        page = (param != null) ? param[2].toLowerCase() : null;
-      } catch(error) {
-        displayError(error, true);
-        page = null;
-      }
-
-
-      // Determine which page we want to render
-      switch (page) {
-        case 'color':
-          this.set({page: 'Color'});
-          break;
-        case 'config':
-          this.set({page: 'Config'});
-          break;
-        case 'info':
-          this.set({page: 'Info'});
-          break;
-        case 'pwm':
-        default:
-          this.set({page: 'PWM'});
-          break;
-      }
+      // Trigger window change calculate current page
+      this.onWindowChange();
 
       restGET('./info', (error, data) => {
         if (error)
@@ -286,6 +274,48 @@
 
         document.title = data.name || '';
       });
+    },
+    methods: {
+      onWindowChange: function() {
+        var self = this;
+        var page = null;
+        // Determine wanted page
+        try {
+          const url = new URL(window.location);
+          const param = /^#(.*)$/.exec(url.hash);
+          page = (param != null) ? param[1].toLowerCase() : null;
+
+        } catch(error) {
+          displayError(error, true);
+          page = null;
+        }
+
+        self.setPage(null, page);
+      },
+
+
+      setPage: function(event, page) {
+        if (event)
+          event.preventDefault();
+        page = page || '';
+
+        // Determine which page we want to render
+        switch (page.toLowerCase()) {
+          case 'color':
+            this.set({page: 'Color'});
+            break;
+          case 'config':
+            this.set({page: 'Config'});
+            break;
+          case 'info':
+            this.set({page: 'Info'});
+            break;
+          case 'pwm':
+          default:
+            this.set({page: 'PWM'});
+            break;
+        }
+      }
     }
   } 
 </script>
