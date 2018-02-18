@@ -48,7 +48,7 @@ export default {
     }),
 
     production && copy({
-      'static/iro.js/iro.js':         targetFolder + 'iro.min.js',
+      'static/iro.js/iro.min.js':         targetFolder + 'iro.min.js',
     }),
     
     !production && copy({
