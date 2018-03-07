@@ -13,9 +13,9 @@ const targetFolder = production?'dist/':'dev_test/'
 export default {
   moduleContext: {
   },
-	input: 'src/main.js',	
-	output: {
-	  name: 'H801',
+  input: 'src/main.js',  
+  output: {
+    name: 'H801',
     // Skip in production to remove the include in the js file
     sourcemap: !production,  
     format: 'iife',
@@ -24,33 +24,45 @@ export default {
   watch: {
     include: 'src/**'
   },
-	plugins: [
+  plugins: [
     resolve({
       browser: true,
     }),
-		svelte({
-			// enable run-time checks when not in production
-			dev: !production,
-			// we'll extract any component CSS out into
-			// a separate file — better for performance
-			/*css: css => {
-				css.write('public/bundle.css');
-			},*/
+    svelte({
+      // enable run-time checks when not in production
+      dev: !production,
+      // we'll extract any component CSS out into
+      // a separate file — better for performance
+      /*css: css => {
+        css.write('public/bundle.css');
+      },*/
       include: ['src/**/*.html'],
-			// this results in smaller CSS files
-			cascade: false,
-		}),
+      // this results in smaller CSS files
+      cascade: false,
+      store: true,
+    }),
 
+    // If we're building for production (npm run build
+    // instead of npm run dev), transpile and minify
+    production && buble({ exclude: 'node_modules/**' }),
+    production && uglify({}, minify),
+    production && gzip({}),
+
+
+    // Standard files
     copy({
         'static/index.html':          targetFolder + 'index.html',
+        'static/favicon.gif':         targetFolder + 'favicon.gif',
         'static/font/fontello.woff':  targetFolder + 'icons.woff',
         verbose: true
     }),
 
+    // Production files
     production && copy({
       'static/iro.js/iro.min.js':         targetFolder + 'iro.min.js',
     }),
     
+    // Devel files
     !production && copy({
         'static/iro.js/iro.js':       targetFolder + 'iro.min.js',
         'static/iro.js/iro.js.map':   targetFolder + 'iro.js.map',
@@ -58,12 +70,5 @@ export default {
         verbose: true
     }),
 
-
-		// If we're building for production (npm run build
-		// instead of npm run dev), transpile and minify
-		production && buble({ exclude: 'node_modules/**' }),
-		production && uglify({}, minify),
-    production && gzip({}),
-
-	]
+  ]
 };

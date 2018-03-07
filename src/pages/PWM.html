@@ -17,18 +17,18 @@
       <label>duration:</label>
 
       <InputSlider  label=duration
-                    bind:value=duration
+                    bind:value=$PWM.duration
                     limitMax=60
                     limitStep=0.1 
                     colorMin='#aaa'
                     colorMax='#aaa'
                     valueSuffix=s
                     /> 
-      <span>{{duration}}s</span>
+      <span>{{$PWM.duration}}s</span>
     </div>
   </div>
   <div class="row">
-    <InputCheckbox label={{'Autopost'}} bind:value=autoPost/>
+    <InputCheckbox label={{'Autopost'}} bind:value=$PWM.autoPost/>
     <label>&nbsp;auto submit</label>
   </div>
   <div class="buttons">
@@ -37,8 +37,7 @@
   </div>
 </form>
 
-<DebugArea value={{value}} />
-
+<DebugArea json={{value}} />
 
 <!-- CSS -->
 <style>
@@ -106,8 +105,6 @@
           'G': '#0f0',
           'B': '#00f'
         },
-        autoPost: true,
-        duration: 1.0
       }
     },
 
@@ -143,11 +140,13 @@
 
         self.set( { prevValue: Object.assign({}, newValues) });
 
-        if (self.get('autoPost') === false)
+        const storeValues = self.store.get('PWM');
+
+        if (storeValues.autoPost === false)
           return;
 
         // Convert duration to ms
-        value.duration = Math.floor(this.get('duration') * 10) * 100;
+        value.duration = Math.floor(storeValues.duration * 10) * 100;
 
         throttlePOST(value);
       }
@@ -163,7 +162,7 @@
     },
 
     methods: {
-      handleRefresh: function ( event ) {
+      handleRefresh ( event ) {
         // prevent the page from reloading
         if (event)
           event.preventDefault();
@@ -181,16 +180,18 @@
         });
       },
 
-      handleSubmit: function ( event ) {
+      handleSubmit ( event ) {
         // prevent the page from reloading
         if (event)
           event.preventDefault();
 
         // Get value and create shallow copy
         var value = Object.assign({}, this.get( 'value' ));
+
+        const storeValues = self.store.get('PWM');
     
         // Convert duration to ms
-        value.duration = Math.floor(this.get('duration') * 10) * 100;
+        value.duration = Math.floor(storeValues.duration * 10) * 100;
 
         console.log(value);
 

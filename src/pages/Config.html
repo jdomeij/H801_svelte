@@ -9,7 +9,7 @@
   </div>
 </form>
 
-<DebugArea bind:value=config />
+<DebugArea json={{config}} />
 
 
 <!-- CSS -->
@@ -65,7 +65,7 @@
     },
 
     methods: {
-      handleRefresh: function ( event ) {
+      handleRefresh ( event ) {
         // prevent the page from reloading
         if (event)
           event.preventDefault();
@@ -83,7 +83,7 @@
           self.set( { config: data, configRender: configRender } );
         });
       },
-      handleSubmit: function ( event ) {
+      handleSubmit ( event ) {
         // prevent the page from reloading
         event.preventDefault();
 
@@ -103,7 +103,8 @@
             // Update name from config
             if (typeof data.name === 'string' && data.name.length) {
               document.title = data.name || '';
-              self.set( { info: { name: data.name }});
+              
+              self.store.set({ name: data.name || 'H801' } );
             }
           }
         });

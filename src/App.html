@@ -5,24 +5,16 @@
   <div class="column">
     <div id="H801">
       <div class="title">
-        <label>{{info.name || 'H801'}}</label>
+        <label>{{$name || 'H801'}}</label>
         {{#each pageList as item}}
-          <a  class="tooltip {{(page == item.link) ? 'active' : ''}}" 
+          <a  class="tooltip {{(page.link == item.link) ? 'active' : ''}}" 
               href="./{{baseURI}}#{{item.link}}" > 
             <i class="{{item.icon}}"></i>
             <span>{{item.desc}}</span>
           </a>
         {{/each}}
       </div>
-      {{#if page === 'Config'}}
-        <Config bind:info=info/>
-      {{elseif page === 'Color'}}
-        <Color/>
-      {{elseif page === 'PWM'}}
-        <PWM/>
-      {{elseif page === 'Info'}}
-        <Info bind:value=info/>
-      {{/if}}
+      <:Component {page.comp} bind:info=info/>
     </div>
 
     <div id="errorArea"></div>
@@ -49,7 +41,7 @@
     font-size:12px;
     font-family:Helvetica, Arial, Sans-Serif;
 
-    width: 370px;
+    width: 360px;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
     padding: 0;
   }
@@ -142,8 +134,7 @@
     position: absolute;
     z-index: 1;
     bottom: 125%;
-    left: 50%;
-    margin-left: -60px;
+    right: 0%;
 
     opacity: 0;
     transition: opacity 1s;
@@ -154,8 +145,8 @@
     content: "";
     position: absolute;
     top: 100%;
-    left: 50%;
-    margin-left: -5px;
+    right: 0%;
+    margin-right: 15px;
     border-width: 5px;
     border-style: solid;
     border-color: #333 transparent transparent transparent;
@@ -218,44 +209,47 @@
   import Info   from './pages/Info.html'
   import { restGET, displayError } from './util.js'
 
+
+  var pageList = [
+    {
+      link: 'PWM',
+      icon: 'icon-sliders',
+      desc: 'PWM Control',
+      comp: PWM,
+    },
+    {
+      link: 'Color',
+      icon: 'icon-eyedropper',
+      desc: 'Color Picker',
+      comp: Color,
+    },
+    {
+      link: 'Config',
+      icon: 'icon-wrench',
+      desc: 'Configuration',
+      comp: Config,
+    },
+    {
+      link: 'Info',
+      icon: 'icon-info',
+      desc: 'Info',
+      comp: Info,
+    },
+  ];
+
   export default {
     data () {
       return {
-        page: '',
         baseURI: '',
         info: {
           name: ''
         },
-        pageList: [
-          {
-            link: 'PWM',
-            icon: 'icon-sliders',
-            desc: 'PWM Control'
-          },
-          {
-            link: 'Color',
-            icon: 'icon-eyedropper',
-            desc: 'Color Picker'
-          },
-          {
-            link: 'Config',
-            icon: 'icon-wrench',
-            desc: 'Configuration'
-          },
-          {
-            link: 'Info',
-            icon: 'icon-info',
-            desc: 'Info'
-          },
-        ]
+        pageList: pageList,
+        page: pageList[0],
       }
     },
 
     components: { 
-      PWM,
-      Config,
-      Color,
-      Info,
     },
 
     oncreate () {
@@ -268,15 +262,13 @@
         if (error)
           return displayError(error);
 
-        // Workaround for failing to set values on load
-        self.set({});
-        self.set({'info': data});
+        self.store.set( { info: data, name: data.name || 'H801' });
 
         document.title = data.name || '';
       });
     },
     methods: {
-      onWindowChange: function() {
+      onWindowChange () {
         var self = this;
         var page = null;
         // Determine wanted page
@@ -294,27 +286,20 @@
       },
 
 
-      setPage: function(event, page) {
+      setPage (event, page) {
         if (event)
           event.preventDefault();
         page = page || '';
 
-        // Determine which page we want to render
-        switch (page.toLowerCase()) {
-          case 'color':
-            this.set({page: 'Color'});
-            break;
-          case 'config':
-            this.set({page: 'Config'});
-            break;
-          case 'info':
-            this.set({page: 'Info'});
-            break;
-          case 'pwm':
-          default:
-            this.set({page: 'PWM'});
-            break;
-        }
+        var newPage = pageList.find((val) => {
+          return (val.link.toLowerCase() === page.toLowerCase());
+        });
+
+        // Fallback to first page
+        if (!newPage)
+          newPage = pageList[0];
+
+        this.set({page: newPage});
       }
     }
   } 

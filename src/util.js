@@ -2,7 +2,7 @@ function displayError(error, appendText) {
   if (error)
     console.log(error);
 
-  var errorArea = document.querySelector( '#errorArea' );
+  const errorArea = document.querySelector( '#errorArea' );
 
   if (!errorArea)
     return;
@@ -17,7 +17,7 @@ function displayError(error, appendText) {
 
   // Clear errors between each calls
   else if (error !== null) {
-    errorArea.innerHTML = error.toString()
+    errorArea.innerHTML = error.toString();
     errorArea.style.display = 'inline-block';
   }
 
@@ -31,22 +31,22 @@ function displayError(error, appendText) {
 }
 
 function restTimeout(ms, promise) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() {
-      reject(new Error("timeout"))
-    }, ms)
-    promise.then(resolve, reject)
-  })
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error("timeout"));
+    }, ms);
+    promise.then(resolve, reject);
+  });
 }
 
 function restCheckStatus(response) {
   if (response.status >= 200 && response.status < 300) {
-    return response
+    return response;
   }
 
-  var error = new Error(response.status + ': ' + response.statusText)
-  error.response = response
-  throw error
+  const error = new Error(response.status + ': ' + response.statusText);
+  error.response = response;
+  throw error;
 }
 
 function restParseJSON(response) {
@@ -66,10 +66,10 @@ function restGET(uri, callback) {
   restTimeout(10000, fetch(uri))
     .then(restCheckStatus)
     .then(restParseJSON)
-    .then(function(data) {
+    .then((data) => {
       callback(null, data);
     })
-    .catch(function(error) {
+    .catch((error) => {
       callback(error);
     });
 }
@@ -96,11 +96,11 @@ function restPOST(uri, jsonData, callback) {
     }))
     .then(restCheckStatus)
     .then(restParseJSON)
-    .then(function(data) {
+    .then((data) => {
       if (typeof callback === 'function')
         callback(null, data);
     })
-    .catch(function(error) {
+    .catch((error) => {
       if (typeof callback === 'function')
         callback(error);
     });
@@ -108,17 +108,17 @@ function restPOST(uri, jsonData, callback) {
 
 
 function throttle(fn, threshhold, scope) {
-  var last;
-  var deferTimer;
+  let last;
+  let deferTimer;
   threshhold || (threshhold = 250);
   return function () {
-    var context = scope || this;
+    const context = scope || this;
 
-    var now = Date.now();
-    var args = arguments;
+    const now = Date.now();
+    const args = arguments;
     if (last && now < last + threshhold) {
       clearTimeout(deferTimer);
-      deferTimer = setTimeout(function () {
+      deferTimer = setTimeout(() => {
         last = now;
         fn.apply(context, args);
       }, threshhold);

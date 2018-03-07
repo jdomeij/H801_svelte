@@ -1,11 +1,12 @@
 <!-- HTML -->
 <div>
-  <InfoRows bind:value=value />
+  <InfoRows value={{$info}} />
   <div class="buttons">
     <button on:click="handleRefresh( event )" class="btnRefresh">Refresh</button>
   </div>
 </div>
 
+<DebugArea json={{$info}} />
 
 <!-- CSS -->
 <style>
@@ -35,21 +36,25 @@
 <!-- Code -->
 <script>
   import InfoRows from '../components/InfoRows.html';
+  import DebugArea from '../components/DebugArea.html';
   import { restGET, displayError } from '../util.js';
 
   export default {
     data () {
       return {
-        value: {}
       }
     },
 
     components: {
-      InfoRows
+      InfoRows,
+      DebugArea
+    },
+
+    oncreate () {
     },
 
     methods: {
-      handleRefresh: function ( event ) {
+      handleRefresh ( event ) {
         // prevent the page from reloading
         event.preventDefault();
 
@@ -58,7 +63,8 @@
           displayError(error, false);
           if (error)
             return;
-          self.set( { value: data } );
+
+          self.store.set({ info: data, name: data.name || 'H801' } );
         });
       },
     }

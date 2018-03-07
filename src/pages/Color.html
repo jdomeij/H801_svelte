@@ -6,17 +6,17 @@
     <label>duration:</label>
 
     <InputSlider  label=duration
-                  bind:value=duration
+                  bind:value=$Color.duration
                   limitMax=60
                   limitStep=0.1 
                   colorMin='#aaa'
                   colorMax='#aaa'
                   valueSuffix=s
                   /> 
-    <span>{{duration}}s</span>
+    <span>{{$Color.duration}}s</span>
   </div>
   <div class="row">
-    <InputCheckbox label={{'Autopost'}} bind:value=autoPost/>
+    <InputCheckbox label={{'Autopost'}} bind:value=$Color.autoPost/>
     <label>&nbsp;auto submit</label>
   </div>
   <div class="buttons">
@@ -25,7 +25,7 @@
   </div>
 </form>
 
-<DebugArea bind:value=value />
+<DebugArea json={{value}} />
 
 
 <!-- CSS -->
@@ -97,8 +97,6 @@
           B: 0,
         },
         ignoreSetEvent: false,
-        duration: 1.0,
-        autoPost: true,
         colorPicker: null,
       }
     },
@@ -130,9 +128,8 @@
       // Throttled post function
       var throttlePOST = throttle(self.handleSubmit.bind(self), 250, self);
 
-
-      // Delay event attachment until so we don't trigger on the initial trigger
-      onDocReady(function() {
+      // Delay event attachment so we don't trigger on init
+      onDocReady(() => {
         colorPicker.on("color:change", (color, changes) => {
           // Get value and create shallow copy
           var value = Object.assign({}, self.get( 'value' ));
@@ -143,9 +140,12 @@
 
           self.set({ value: value });
 
-          if (self.get('autoPost') === false)
+          const storeValues = self.store.get('Color');
+
+          if (storeValues.autoPost === false)
             return;
 
+          // Check if we should ignore this event
           if (self.get('ignoreSetEvent') !== true)
             throttlePOST();
         });
@@ -167,7 +167,7 @@
     },
 
     methods: {
-      updateValues: function(data) {
+      updateValues (data) {
         // Get value and create shallow copy
         var value = Object.assign({}, this.get( 'value' ));
 
@@ -186,7 +186,7 @@
       },
 
 
-      handleRefresh: function ( event ) {
+      handleRefresh ( event ) {
         // prevent the page from reloading
         if (event)
           event.preventDefault();
@@ -198,7 +198,7 @@
         });
       },
 
-      handleSubmit: function ( event ) {
+      handleSubmit ( event ) {
         // prevent the page from reloading
         if (event)
           event.preventDefault();
@@ -206,8 +206,10 @@
         // Get value and create shallow copy
         var value = Object.assign({}, this.get( 'value' ));
     
+        const storeValues = self.store.get('Color');
+
         // Convert duration to ms
-        value.duration = Math.floor(this.get('duration') * 10) * 100;
+        value.duration = Math.floor(storeValues.duration * 10) * 100;
 
         console.log(value);
 
