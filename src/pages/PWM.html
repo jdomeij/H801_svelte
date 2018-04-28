@@ -1,17 +1,19 @@
+
+
 <!-- HTML -->
 <form on:submit='handleSubmit( event )'>
   <div>
-    {{#each Object.keys(value) as key}}
+    {#each Object.keys(value) as key}
       <div class="row">
-        <label>{{key}}:</label>
-        <InputSlider  label={{key}}
+        <label>{key}:</label>
+        <InputSlider  label={key}
                       bind:value=value[key]
                       limitMax=255
-                      colorMax={{colors.hasOwnProperty(key)?colors[key]:'#fff'}}
+                      colorMax={colors.hasOwnProperty(key)?colors[key]:'#fff'}
                       />
-        <span>{{value[key]}}</span>
+        <span>{value[key]}</span>
       </div>
-    {{/each}}
+    {/each}
 
     <div class="row">
       <label>duration:</label>
@@ -24,11 +26,11 @@
                     colorMax='#aaa'
                     valueSuffix=s
                     /> 
-      <span>{{$PWM.duration}}s</span>
+      <span>{$PWM.duration}s</span>
     </div>
   </div>
   <div class="row">
-    <InputCheckbox label={{'Autopost'}} bind:value=$PWM.autoPost/>
+    <InputCheckbox label={'Autopost'} bind:value=$PWM.autoPost/>
     <label>&nbsp;auto submit</label>
   </div>
   <div class="buttons">
@@ -37,7 +39,7 @@
   </div>
 </form>
 
-<DebugArea json={{value}} />
+<DebugArea json={value} />
 
 <!-- CSS -->
 <style>
@@ -96,6 +98,7 @@
   export default {
     data () {
       return {
+        ignoreSetEvent: false,
         value: {
         },
         prevValue: {
@@ -116,8 +119,6 @@
 
     oncreate () {
       var self = this;
-      var ignoreSetEvent = false;
-
       var throttlePOST = throttle((value) => {
           console.log(value);
           restPOST('./status', value, (error) => {
@@ -125,40 +126,43 @@
           });
         }, 250, self);
 
-      // On change function
-      function observeValueFunc(oldValues, newValues) {
-        if (self.get('ignoreSetEvent') === true)
-          return;
-
-        var prevValue = self.get('prevValue');
-
-        var value = Object.keys(newValues).reduce((coll, key, val) => {
-          if (newValues.hasOwnProperty(key) && prevValue[key] !== newValues[key])
-            coll[key] = newValues[key];
-          return coll;
-        }, {})
-
-        self.set( { prevValue: Object.assign({}, newValues) });
-
-        const storeValues = self.store.get('PWM');
-
-        if (storeValues.autoPost === false)
-          return;
-
-        // Convert duration to ms
-        value.duration = Math.floor(storeValues.duration * 10) * 100;
-
-        throttlePOST(value);
-      }
-
-      // Listen for changes
-      self.observe('value', 
-                   observeValueFunc, 
-                   { init: false });
-
+      self.set({throttlePOST});
 
       // Get initial data
       self.handleRefresh(null);
+    },
+
+    onupdate ({ changed, current, previous }) {
+      const self = this;
+
+      if (previous === undefined)
+        return;
+
+      if (changed.value) {
+        const {ignoreSetEvent, prevValue, throttlePOST} = self.get();
+        if (ignoreSetEvent === true)
+          return;
+
+        var value = Object.keys(current.value).reduce((coll, key) => {
+          if (current.value.hasOwnProperty(key) && prevValue[key] !== current.value[key])
+            coll[key] = current.value[key];
+          return coll;
+        }, {})
+
+        self.set( { prevValue: Object.assign({}, current.value) });
+
+        const { PWM }  = self.store.get();
+
+        if (PWM.autoPost === false)
+          return;
+
+        // Convert duration to ms
+        value.duration = Math.floor(PWM.duration * 10) * 100;
+
+        if (typeof throttlePOST === 'function') {
+          throttlePOST(value);
+        }
+      }
     },
 
     methods: {
@@ -186,19 +190,20 @@
           event.preventDefault();
 
         // Get value and create shallow copy
-        var value = Object.assign({}, this.get( 'value' ));
+        const { value } = this.get();
+        var postValue = Object.assign({}, value);
 
-        const storeValues = self.store.get('PWM');
+        const { PWM } = self.store.get();
     
         // Convert duration to ms
-        value.duration = Math.floor(storeValues.duration * 10) * 100;
+        postValue.duration = Math.floor(PWM.duration * 10) * 100;
 
-        console.log(value);
+        console.log(postValue);
 
-        restPOST('./status', value, (error) => {
+        restPOST('./status', postValue, (error) => {
           displayError(error, false);
         });
-      }
+      },
     }
   };
 </script>

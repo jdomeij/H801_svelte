@@ -6,16 +6,6 @@
   "repository": {},
   "bugs": {},
   "devDependencies": {
-    "concurrently": "^3.5.1",
-    "rollup": "^0.56.0",
-    "rollup-plugin-buble": "^0.19.0",
-    "rollup-plugin-copy": "^0.2.3",
-    "rollup-plugin-gzip": "^1.3.0",
-    "rollup-plugin-node-resolve": "^3.2.0",
-    "rollup-plugin-svelte": "^4.0.0",
-    "rollup-plugin-uglify": "^3.0.0",
-    "serve": "^6.5.2",
-    "uglify-es": "^3.3.9"
   },
   "license": "Apache-2.0",
   "scripts": {
@@ -25,9 +15,16 @@
     "dev": "concurrently --kill-others \"npm run watch\" \"npm run serve\""
   },
   "dependencies": {
-    "svelte": "^1.56.4",
-    "svelte-cli": "^2.2.0",
-    "svelte-extras": "^1.6.0",
-    "svelte-loader": "^2.5.0"
+    "concurrently": "^3.5.1",
+    "rollup": "^0.58.2",
+    "rollup-plugin-buble": "^0.19.0",
+    "rollup-plugin-copy": "^0.2.3",
+    "rollup-plugin-gzip": "^1.3.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-svelte": "^4.1.0",
+    "rollup-plugin-uglify": "^3.0.0",
+    "svelte": "^2.1.1",
+    "serve": "^6.5.6",
+    "uglify-es": "^3.3.10"
   }
 }

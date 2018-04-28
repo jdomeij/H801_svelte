@@ -1,31 +1,31 @@
 <!-- HTML -->
-{{#if label.length}}
+{#if label.length}
   <div class="group">
-    <label>{{label}}</label>
+    <label>{label}</label>
   </div>
-{{/if}}
-{{#each Object.keys(valueRender) as prop}}
-  {{#if typeof valueRender[prop] === 'object'}}
-    <:Self label={{prop}} valueRender={{ Object.assign({}, valueRender[prop]) }} bind:value=value[prop] />
-  {{else}}
+{/if}
+{#each Object.keys(valueRender) as prop}
+  {#if typeof valueRender[prop] === 'object'}
+    <svelte:self label={prop} valueRender={ Object.assign({}, valueRender[prop]) } bind:value=value[prop] />
+  {:else}
     <div class="row">
-      <label>{{prop}}</label>
-      {{#if typeof valueRender[prop] === 'string'}}
-        {{#if prop.substr(-5) === 'passw'}}
+      <label>{prop}</label>
+      {#if typeof valueRender[prop] === 'string'}
+        {#if prop.substr(-5) === 'passw'}
           <InputPassword bind:value=value[prop]/>
-        {{else}}
+        {:else}
           <InputText bind:value=value[prop]/>
-        {{/if}}
-      {{elseif typeof valueRender[prop] === 'number'}}
+        {/if}
+      {:elseif typeof valueRender[prop] === 'number'}
         <InputNumber bind:value=value[prop]/>
-      {{elseif typeof valueRender[prop] === 'boolean'}}
+      {:elseif typeof valueRender[prop] === 'boolean'}
         <InputBool bind:value=value[prop]/>
-      {{elseif typeof valueRender[prop] === 'object'}}
-        <:Self valueRender={{ Object.assign({}, valueRender[prop]) }} bind:value=value[prop] />
-      {{/if}}
+      {:elseif typeof valueRender[prop] === 'object'}
+        <svelte:self valueRender={ Object.assign({}, valueRender[prop]) } bind:value=value[prop] />
+      {/if}
     </div>
-  {{/if}}
-{{/each}}
+  {/if}
+{/each}
 
 
 <!-- CSS -->

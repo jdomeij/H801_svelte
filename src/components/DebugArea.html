@@ -1,9 +1,9 @@
 <!-- HTML -->
-{{#if enabled === true}}
+{#if enabled === true}
   <div id="debugArea">
-    <label>Debug:</label><pre>{{JSON.stringify(json, (k,v) => { return v === undefined ? '(undefined)': v; }, 2)}}</pre>
+    <label>Debug:</label><pre>{JSON.stringify(json, (k,v) => { return v === undefined ? '(undefined)': v; }, 2)}</pre>
   </div>
-{{/if}}
+{/if}
 
 <!-- CSS -->
 <style>
@@ -33,7 +33,7 @@
     data () {
       return {
         json: {},
-        enabled: false
+        enabled: true
       }
     },
   };

@@ -1,20 +1,20 @@
-<:Window on:hashchange='onWindowChange()' />
+<svelte:window on:hashchange='onWindowChange()' />
 
 <!-- HTML -->
 <div class="center">
   <div class="column">
     <div id="H801">
       <div class="title">
-        <label>{{$name || 'H801'}}</label>
-        {{#each pageList as item}}
-          <a  class="tooltip {{(page.link == item.link) ? 'active' : ''}}" 
-              href="./{{baseURI}}#{{item.link}}" > 
-            <i class="{{item.icon}}"></i>
-            <span>{{item.desc}}</span>
+        <label>{$name || 'H801'}</label>
+        {#each pageList as item}
+          <a  class="tooltip {(page.link == item.link) ? 'active' : ''}" 
+              href="./{baseURI}#{item.link}" > 
+            <i class="{item.icon}"></i>
+            <span>{item.desc}</span>
           </a>
-        {{/each}}
+        {/each}
       </div>
-      <:Component {page.comp} bind:info=info/>
+      <svelte:component this={page.comp} {info}/>
     </div>
 
     <div id="errorArea"></div>

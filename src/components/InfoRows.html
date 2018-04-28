@@ -1,17 +1,17 @@
 <!-- HTML -->
-{{#each Object.keys(value) as key}}
-  {{#if typeof value[key] === 'object'}}
-    <span class="cat">{{key}}</span>
+{#each Object.keys(value) as key}
+  {#if typeof value[key] === 'object'}
+    <span class="cat">{key}</span>
     <div class="cat">
-      <:Self value='{{value[key]}}'/>
+      <svelte:self value='{value[key]}'/>
     </div>
-  {{else}}
+  {:else}
     <div class="val">
-      <span class="key">{{key}}:</span>
-      <span class="val">{{value[key]}}</span>
+      <span class="key">{key}:</span>
+      <span class="val">{value[key]}</span>
     </div>
-  {{/if}}
-{{/each}}
+  {/if}
+{/each}
 
 
 <!-- CSS -->

@@ -13,10 +13,10 @@
                   colorMax='#aaa'
                   valueSuffix=s
                   /> 
-    <span>{{$Color.duration}}s</span>
+    <span>{$Color.duration}s</span>
   </div>
   <div class="row">
-    <InputCheckbox label={{'Autopost'}} bind:value=$Color.autoPost/>
+    <InputCheckbox label={'Autopost'} bind:value=$Color.autoPost/>
     <label>&nbsp;auto submit</label>
   </div>
   <div class="buttons">
@@ -25,7 +25,7 @@
   </div>
 </form>
 
-<DebugArea json={{value}} />
+<DebugArea json={value} />
 
 
 <!-- CSS -->
@@ -111,7 +111,7 @@
       var self = this;
 
       // Workaround for failing to set values on load
-      self.set({});
+      //self.set({});
 
       var colorPicker = new iro.ColorPicker('#colorPicker', {
         width: 370
@@ -132,21 +132,22 @@
       onDocReady(() => {
         colorPicker.on("color:change", (color, changes) => {
           // Get value and create shallow copy
-          var value = Object.assign({}, self.get( 'value' ));
+          const { value, ignoreSetEvent } = self.get();
+          var postValue = Object.assign({}, value);
 
-          value.R = color.rgb.r || 0;
-          value.G = color.rgb.g || 0;
-          value.B = color.rgb.b || 0;
+          postValue.R = color.rgb.r || 0;
+          postValue.G = color.rgb.g || 0;
+          postValue.B = color.rgb.b || 0;
 
-          self.set({ value: value });
+          self.set({ value: postValue });
 
-          const storeValues = self.store.get('Color');
+          const { Color } = self.store.get();
 
-          if (storeValues.autoPost === false)
+          if (Color.autoPost === false)
             return;
 
           // Check if we should ignore this event
-          if (self.get('ignoreSetEvent') !== true)
+          if (ignoreSetEvent!== true)
             throttlePOST();
         });
       });
@@ -169,17 +170,18 @@
     methods: {
       updateValues (data) {
         // Get value and create shallow copy
-        var value = Object.assign({}, this.get( 'value' ));
+        const { value, colorPicker } = this.get();
+        var postValue = Object.assign({}, value);
 
-        value.R = data.R || 0;
-        value.G = data.G || 0;
-        value.B = data.B || 0;
 
-        this.set({ value: value });
+        postValue.R = data.R || 0;
+        postValue.G = data.G || 0;
+        postValue.B = data.B || 0;
+
+        this.set({ value: postValue });
 
         // ignore this event so we don't re-post the values
         this.set({ignoreSetEvent: true});
-        var colorPicker = this.get('colorPicker');
         if (colorPicker)
           colorPicker.color.set({r: data.R || 0, g: data.G || 0, b: data.B || 0 });
         this.set({ignoreSetEvent: false});
@@ -204,19 +206,20 @@
           event.preventDefault();
 
         // Get value and create shallow copy
-        var value = Object.assign({}, this.get( 'value' ));
+        const { value, colorPicker } = this.get();
+        var postValue = Object.assign({}, value);
     
-        const storeValues = self.store.get('Color');
+        const { Color } = self.store.get();
 
         // Convert duration to ms
-        value.duration = Math.floor(storeValues.duration * 10) * 100;
+        value.duration = Math.floor(Color.duration * 10) * 100;
 
         console.log(value);
 
         restPOST('./status', value, (error) => {
           displayError(error, false);
         });
-      }
+      },
     }
   }
 </script>
